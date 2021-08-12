@@ -5,7 +5,9 @@ function loadSettings()
     define("MYLIST",$xml->reading);
 }
 /*
-    Goes the given $url and performs the given $regex.
+    Goes the given $url and performs the given $reg as a regular expression.
+    $x denotes the amount of matches from the regex to include in the return array.
+    Returns a 2D array.
 */
 function getList($url, $reg, $x)
 {
@@ -38,41 +40,31 @@ function getList($url, $reg, $x)
  /*
     Release List
         [0](manga1)
-            [0] Link to manga , [1] Title, [2] chapter number, [3] Link to Group, [4] Group
+            [0] Manga ID , [1] Manga name, [2] chapter number, [3] Group ID, [4] Group name
         [1](manga2)
 */
 function getLatestReleaseList()
 {
     $link = "https://www.mangaupdates.com/releases.html";
-    //https://regex101.com/r/8vGpn3/1
-    $regex = '/<div class=.col-6 pbreak.*href=.(.*)..ti.*Info.>(.*)<\/a.*\n.*c.(.*)<.*\n.*href=.(.*)..ti.*Info.>(.*)<\/a.*/m';
+    $regex = '/<div class=.col-6 pbreak.*href=.https:\/\/www.mangaupdates.com\/series.html\?id=(.*)..ti.*Info.>(.*)<\/a.*\n.*c.(.*)<.*\n.*href=.https:\/\/www.mangaupdates.com\/groups.html\?id=(.*)..ti.*Info.>(.*)<\/a.*/m';
 
     return getList($link, $regex, 5);
 }
 /*
     Reading List
         [0](manga1)
-            [0] Title
+            [0] Manga ID [1] Manga name
         [1](manga2)
-    but convert into 1d array for simplicity
-    Reading List
-        [0] Title
-        [1] Title2
 */
 function getMyMangaList()
 {
-    $regex = '/title=.Series Info.><u>(.*)<\/u>/m';
+    $regex = '/<td class=.text pl .*><a href=.https:\/\/www.mangaupdates.com\/series.html\?id=(.*). title=.Series Info.><u>(.*)<\/u>/m';
 
-    $tempList = getList(MYLIST, $regex, 1);
-    $list = array();
-
-    foreach($tempList as $temp)
-        array_push($list, $temp[0]);
-
-    return $list;
+    return getList(MYLIST, $regex, 2);
+    
 }
 /*
-    Checks if each entry in $releases is in $reading. If so, adds it to a new array.
+    Checks if each entry in $releases is in $reading by comparing manga ids. If so, adds it to a new array.
     Returns that array
 */
 function compareLists($releases, $reading)
@@ -81,7 +73,7 @@ function compareLists($releases, $reading)
 
     foreach($releases as $releasedChapter)
     {
-        if(isChapterBeingRead($releasedChapter[1], $reading))
+        if(isChapterBeingRead($releasedChapter[0], $reading))
             array_push($rssMangaList, $releasedChapter);
     }
     
@@ -90,12 +82,13 @@ function compareLists($releases, $reading)
 /*
     Returns true if given $chapterName is in 1d array $reading
 */ 
-function isChapterBeingRead($chapterName,$reading)
+function isChapterBeingRead($chapter,$reading)
 {
-    //CHANGE THIS TO BINARY SEARCH LATER
+    //Change this to binary search? Then $reading would have to be sorted first.
     foreach($reading as $manga)
     {
-        if ($manga == $chapterName)
+        //echo "$manga comp $chapter";
+        if ($manga[0] == $chapter)
             return true;
     }
 
@@ -106,7 +99,7 @@ function isChapterBeingRead($chapterName,$reading)
 */
 function printRSS($list)
 {
-    //Add a <image> here later. https://www.rssboard.org/rss-specification
+    //Add a <image> here later? Not needed for QuiteRSS. https://www.rssboard.org/rss-specification
     echo "<?xml version='1.0' encoding='UTF-8' ?>
     <rss version='2.0'>
         <channel>
@@ -114,23 +107,21 @@ function printRSS($list)
             <link> https://www.mangaupdates.com/releases.html </link>
             <description> RSS for Releases but only with manga on your Reading list </description>";
 
-    //[0] Link to manga , [1] Title, [2] chapter number, [3] Link to Group, [4] Group
+    //[0] Manga ID , [1] Manga name, [2] chapter number, [3] Group ID, [4] Group
     foreach($list as $manga)
     {
-        $mangaLink = $manga[0];
+        $mangaID = $manga[0];
         $title = $manga[1];
         $chapters = $manga[2];
-        $groupLink = $manga[3];
+        $groupID = $manga[3];
         $group = $manga[4];
-
-        //Is there a better guid than this?
 
         echo 
         "<item>
-            <title> Chapter(s) $chapters of $title </title>
-            <link> $mangaLink </link>
-            <description><![CDATA[ Check out the new chapter(s) of <a href='$mangaLink'>$title</a> translated by <a href='$groupLink'>$group</a> ]]></description>
-            <guid>$title $chapters $group </guid>
+            <title> Chapter(s) $title - Chapter(s) $chapters </title>
+            <link> https://www.mangaupdates.com/series.html?id=$mangaID </link>
+            <description><![CDATA[Group: <a href='https://www.mangaupdates.com/groups.html?id=$groupID'>$group</a> ]]></description>
+            <guid>$mangaID $groupID $chapters  </guid>
         </item>";
     }
 
