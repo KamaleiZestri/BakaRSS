@@ -60,8 +60,11 @@ function getMyMangaList()
 {
     $regex = '/<td class=.text pl .*><a href=.https:\/\/www.mangaupdates.com\/series.html\?id=(.*). title=.Series Info.><u>(.*)<\/u>/m';
 
-    return getList(MYLIST, $regex, 2);
+    $temp= getList(MYLIST, $regex, 2);
     
+    sort($temp);
+
+    return $temp;
 }
 /*
     Checks if each entry in $releases is in $reading by comparing manga ids. If so, adds it to a new array.
@@ -84,11 +87,19 @@ function compareLists($releases, $reading)
 */ 
 function isChapterBeingRead($chapter,$reading)
 {
-    //Change this to binary search? Then $reading would have to be sorted first.
-    foreach($reading as $manga)
+    //Binary Search
+    $low = 0;
+    $high = count($reading)-1;
+
+    while ($low <= $high)
     {
-        //echo "$manga comp $chapter";
-        if ($manga[0] == $chapter)
+        $mid = ($low + $high) /2;
+
+        if ($chapter > $reading[$mid][0])
+            $low = $mid +1;
+        else if($chapter < $reading[$mid][0])
+            $high = $mid -1;
+        else
             return true;
     }
 
