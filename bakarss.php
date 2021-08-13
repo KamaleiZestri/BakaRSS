@@ -1,8 +1,8 @@
 <?php
 function loadSettings()
 {
-    $xml = simplexml_load_file("settings.xml");
-    define("MYLIST",$xml->reading);
+    $url = file_get_contents("settings.txt");
+    define("MYLIST",$url);
 }
 /*
     Goes the given $url and performs the given $reg as a regular expression.
