@@ -110,7 +110,6 @@ function isChapterBeingRead($chapter,$reading)
 */
 function printRSS($list)
 {
-    //Add a <image> here later? Not needed for QuiteRSS. https://www.rssboard.org/rss-specification
     echo "<?xml version='1.0' encoding='UTF-8' ?>
     <rss version='2.0'>
         <channel>
@@ -145,10 +144,4 @@ $releases = getLatestReleaseList();
 $reading = getMyMangaList();
 $rssMangaList = compareLists($releases,$reading);
 printRSS($rssMangaList);
-
-// echo "<pre>";
-// print_r($releases);
-// print_r($reading);
-// print_r($rssMangaList);
-// echo "</pre>";
 ?>
