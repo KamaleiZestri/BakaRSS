@@ -1,3 +1,6 @@
+# NOTICE: USE [RSS-BRIDGE](https://github.com/RSS-Bridge/rss-bridge) INSTEAD
+I updated and maintain the MangaUpdates Bridge there to do everything this can, but simpler, better and without the accidental flaw in this one that I won't fix.
+
 # Baka RSS
 Why doesn't [MangaUpdates](https://www.mangaupdates.com/index.html) have an rss feed of JUST the manga you are reading? Well now it can. with the help of [XAMPP](https://www.apachefriends.org/index.html).
 
